@@ -1,5 +1,10 @@
 const News = require("../models/news.model");
 
+// const getNewsBySlug = async (req, res) => {
+//   const news = await News.findOne({ slug: req.params.slug });
+//   res.json(news);
+// };
+
 const getTrendingNewsByCategory = async (req, res) => {
   const news = await News.find({
     isTrending: true,
@@ -7,6 +12,25 @@ const getTrendingNewsByCategory = async (req, res) => {
   }).select("shortDescription picUrl videoUrl slug");
   res.json(news);
 };
+
+// const getTrendingNewsByCategory = async (req, res) => {
+//   try {
+//     const { category } = req.query; // use query param like ?category=technology
+//     const filter = { isTrending: true };
+
+//     if (category) {
+//       filter.category = category;
+//     }
+
+//     const news = await News.find(filter).select(
+//       "title shortDescription picUrl videoUrl slug category"
+//     );
+//     res.json(news);
+//   } catch (err) {
+//     console.error("Error fetching trending news:", err);
+//     res.status(500).json({ error: "Server error" });
+//   }
+// };
 
 const getLiveNews = async (req, res) => {
   const news = await News.find({ isLiveUpdate: true })
