@@ -1,5 +1,3 @@
-
-
 /**
  * @fileoverview Routes related to news functionality.
  * @module routes/newsRoutes
@@ -33,39 +31,84 @@ const {
  *       properties:
  *         id:
  *           type: string
- *           description: Unique identifier for the news item
+ *           description: Unique identifier for the news item.
  *         title:
  *           type: string
- *           description: Title of the news article
- *         slug:
+ *           description: Title of the news article.
+ *         shortDescription:
  *           type: string
- *           description: URL-friendly slug of the news article
- *         category:
- *           type: string
- *           description: Category of the news (e.g., Politics, Sports, Technology)
- *         content:
- *           type: string
- *           description: Full content of the news article
- *         imageUrl:
- *           type: string
- *           format: uri
- *           description: Image associated with the news article
- *         publishedAt:
+ *           description: Short summary or overview of the news article.
+ *         datePosted:
  *           type: string
  *           format: date-time
- *           description: Date and time when the article was published
- *         author:
+ *           description: Date and time when the article was posted.
+ *         user:
  *           type: string
- *           description: Author of the news article
+ *           description: ID or username of the author who uploaded the article.
+ *         picUrl:
+ *           type: string
+ *           format: uri
+ *           description: URL of the main image associated with the news article.
+ *         videoUrl:
+ *           type: string
+ *           format: uri
+ *           description: URL of a related video (if available).
+ *         timetoread:
+ *           type: string
+ *           description: Estimated time to read the article (e.g., "5 min").
+ *         category:
+ *           type: string
+ *           description: Category or section of the news.
+ *           enum:
+ *             - world
+ *             - politics
+ *             - business
+ *             - technology
+ *             - health
+ *             - sports
+ *             - culture
+ *             - podcast
+ *           default: "Others"
+ *         slug:
+ *           type: string
+ *           description: URL-friendly slug of the article.
+ *         content:
+ *           type: string
+ *           description: Full content or body of the news article.
+ *         isTrending:
+ *           type: boolean
+ *           description: Indicates if the article is currently trending.
+ *         isLiveUpdate:
+ *           type: boolean
+ *           description: Indicates if the article is part of live updates.
+ *         createdAt:
+ *           type: string
+ *           format: date-time
+ *           description: Timestamp when the article was created.
+ *         updatedAt:
+ *           type: string
+ *           format: date-time
+ *           description: Timestamp when the article was last updated.
+ *       required:
+ *         - id
+ *         - title
+ *         - content
  *       example:
  *         id: "675c54f5bfe9a0323dfb5b91"
  *         title: "Tech Giants Announce New AI Partnership"
+ *         shortDescription: "Leading tech firms collaborate to accelerate AI research and safety measures."
+ *         datePosted: "2025-10-21T12:00:00Z"
+ *         user: "user_123"
+ *         picUrl: "https://example.com/images/ai-news.jpg"
+ *         videoUrl: "https://example.com/videos/ai-news.mp4"
+ *         timetoread: "5 min"
+ *         category: "technology"
  *         slug: "tech-giants-announce-new-ai-partnership"
- *         category: "Technology"
- *         content: "Leading technology companies have joined forces to develop..."
- *         imageUrl: "https://example.com/images/ai-news.jpg"
- *         publishedAt: "2025-10-21T12:00:00Z"
- *         author: "John Doe"
+ *         content: "Leading technology companies have joined forces to develop safer AI models..."
+ *         isTrending: true
+ *         isLiveUpdate: false
+ *         createdAt: "2025-10-21T12:00:00Z"
+ *         updatedAt: "2025-10-21T14:00:00Z"
  */
 
 /**
@@ -204,7 +247,6 @@ const {
  *         description: Missing or invalid query parameter
  */
 
-
 /**
  * @route GET /api/news/trending/:category
  * @desc Get trending news by category
@@ -214,7 +256,7 @@ const {
 router.get("/trending/:category", getTrendingNewsByCategory);
 
 /**
- * @route GET /api/news/lastest
+ * @route GET /api/news/latest
  * @desc Get latest news
  * @returns {Object[]} 200 - An array of latest news items
  */
