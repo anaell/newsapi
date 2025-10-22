@@ -13,6 +13,7 @@ const {
   getNewsByCategory,
   getNewsBySlug,
   searchNews,
+  getAllCategory,
 } = require("../controllers/newsController");
 
 /**
@@ -246,6 +247,32 @@ const {
  *       400:
  *         description: Missing or invalid query parameter
  */
+
+/**
+ * @swagger
+ * /api/news/categories:
+ *   get:
+ *     summary: Get all available news categories
+ *     tags: [News]
+ *     responses:
+ *       200:
+ *         description: An array of available news categories
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: string
+ *       500:
+ *         description: Server error
+ */
+
+/**
+ * @route GET /api/news/categories
+ * @desc Get all available news categories
+ * @returns {string[]} 200 - An array of category names
+ */
+router.get("/categories", getAllCategory);
 
 /**
  * @route GET /api/news/trending/:category
