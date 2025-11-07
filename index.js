@@ -46,6 +46,8 @@ const { swaggerSpec, swaggerUi } = require("./swagger");
 
 const newRoutes = require("./routes/newsRoutes");
 const podcastRoutes = require("./routes/podcastRoutes");
+const categoryRoutes = require("./routes/categories.route");
+const userRoutes = require("./routes/users.route");
 
 const app = express();
 const port = process.env.PORT || 5000;
@@ -61,7 +63,9 @@ app.get("/", (req, res) => {
 // Mount your routes
 app.use("/api/news", newRoutes);
 app.use("/api/podcast", podcastRoutes);
+app.use("/api/categories", categoryRoutes);
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+app.use("/api/auth", userRoutes);
 
 // Start server first
 app.listen(port, () => {

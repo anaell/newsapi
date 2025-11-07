@@ -17,8 +17,9 @@ const podcastSchema = new mongoose.Schema(
       type: Date,
     },
     user: {
-      type: String,
+      type: mongoose.Schema.Types.ObjectId,
       ref: "User",
+      required: true,
     },
     picUrl: {
       type: String,
@@ -33,17 +34,14 @@ const podcastSchema = new mongoose.Schema(
     },
     category: {
       type: String,
-      enum: [
-        "world",
-        "politics",
-        "business",
-        "technology",
-        "health",
-        "sports",
-        "culture",
-        "podcast",
-      ],
-      default: "Others",
+      required: true,
+      validate: {
+        validator: async function (value) {
+          const exists = await Category.findOne({ name: value });
+          return !!exists;
+        },
+        message: (props) => `${props.value} is not a valid category`,
+      },
     },
     slug: {
       type: String,

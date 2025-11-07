@@ -13,6 +13,7 @@ const swaggerDefinition = {
   servers: [
     {
       url: "https://newsapi-w6iw.onrender.com/",
+      // url: "https:localhost:5000/",
       description: "Development server",
     },
   ],

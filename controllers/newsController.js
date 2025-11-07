@@ -1,15 +1,5 @@
 const News = require("../models/news.model");
 
-const getAllCategory = async (req, res) => {
-  try {
-    const allCategory = News.schema.path("category").enumValues;
-    res.status(200).json({ categories: allCategory });
-  } catch (error) {
-    console.error("Error fetching categories:", error);
-    res.status(500).json({ message: "Server error while fetching categories" });
-  }
-};
-
 const getTrendingNewsByCategory = async (req, res) => {
   try {
     const news = await News.find({
@@ -30,7 +20,8 @@ const getLiveNews = async (req, res) => {
     const news = await News.find({ isLiveUpdate: true })
       .sort({ createdAt: -1 })
       .limit(10)
-      .select("title user shortDescription picUrl slug category");
+      .select("title user shortDescription picUrl slug category")
+      .populate("user", "email name");
     res.status(200).json(news);
   } catch (error) {
     console.error("Error fetching live news:", error);
@@ -50,7 +41,8 @@ const getLatestNews = async (req, res) => {
       .limit(limit)
       .select(
         "title user shortDescription picUrl videoUrl datePosted slug category"
-      );
+      )
+      .populate("user", "email name");
 
     res.status(200).json(news);
   } catch (error) {
@@ -63,9 +55,11 @@ const getLatestNews = async (req, res) => {
 
 const getNewsByCategory = async (req, res) => {
   try {
-    const news = await News.find({ category: req.params.category }).select(
-      "title imgUrl videoUrl datePosted user shortDescription picUrl slug"
-    );
+    const news = await News.find({ category: req.params.category })
+      .select(
+        "title imgUrl videoUrl datePosted user shortDescription picUrl slug"
+      )
+      .populate("user", "email name");
     res.status(200).json(news);
   } catch (error) {
     console.error("Error fetching news by category:", error);
@@ -108,6 +102,52 @@ const searchNews = async (req, res) => {
   }
 };
 
+const createNews = async (req, res) => {
+  try {
+    const news = new News({ ...req.body, user: req.user.id });
+    await news.save();
+    res.status(201).json(news);
+  } catch (err) {
+    if (err.name === "ValidationError") {
+      return res.status(400).json({ error: err.message });
+    }
+    res.status(500).json({ error: "Server error" });
+  }
+};
+
+const updateNews = async (req, res) => {
+  try {
+    const news = await News.findById(req.params.id);
+    if (!news) return res.status(404).json({ message: "News not found" });
+
+    if (news.user.toString() !== req.user.id && req.user.role !== "admin") {
+      return res.status(403).json({ message: "Not authorized" });
+    }
+
+    Object.assign(news, req.body);
+    await news.save();
+    res.json(news);
+  } catch (err) {
+    res.status(500).json({ error: "Server error" });
+  }
+};
+
+const deleteNews = async (req, res) => {
+  try {
+    const news = await News.findById(req.params.id);
+    if (!news) return res.status(404).json({ message: "News not found" });
+
+    if (news.user.toString() !== req.user.id && req.user.role !== "admin") {
+      return res.status(403).json({ message: "Not authorized" });
+    }
+
+    await news.deleteOne();
+    res.status(204).send();
+  } catch (err) {
+    res.status(500).json({ error: "Server error" });
+  }
+};
+
 module.exports = {
   getTrendingNewsByCategory,
   getLatestNews,
@@ -115,5 +155,7 @@ module.exports = {
   getNewsBySlug,
   getNewsByCategory,
   searchNews,
-  getAllCategory,
+  createNews,
+  updateNews,
+  deleteNews,
 };

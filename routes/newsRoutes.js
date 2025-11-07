@@ -1,10 +1,11 @@
 /**
- * @fileoverview Routes related to news functionality.
+ * @fileoverview News routes with complete Swagger documentation.
  * @module routes/newsRoutes
  */
 
 const express = require("express");
 const router = express.Router();
+const auth = require("../middleware/auth");
 
 const {
   getTrendingNewsByCategory,
@@ -13,93 +14,96 @@ const {
   getNewsByCategory,
   getNewsBySlug,
   searchNews,
-  getAllCategory,
+  createNews,
+  updateNews,
+  deleteNews,
 } = require("../controllers/newsController");
 
 /**
  * @swagger
  * tags:
  *   name: News
- *   description: Endpoints related to news functionality
+ *   description: News management and retrieval endpoints
  */
 
 /**
  * @swagger
  * components:
+ *   securitySchemes:
+ *     bearerAuth:
+ *       type: http
+ *       scheme: bearer
+ *       bearerFormat: JWT
+ *
  *   schemas:
+ *     User:
+ *       type: object
+ *       properties:
+ *         _id:
+ *           type: string
+ *           description: User ID
+ *         email:
+ *           type: string
+ *           description: Email of the user
+ *         name:
+ *           type: string
+ *           description: Full name of the user
+ *       example:
+ *         _id: "64af21b1234567890abcdef1"
+ *         email: "reporter@example.com"
+ *         name: "Jane Reporter"
+ *
  *     NewsItem:
  *       type: object
  *       properties:
- *         id:
+ *         _id:
  *           type: string
- *           description: Unique identifier for the news item.
  *         title:
  *           type: string
- *           description: Title of the news article.
  *         shortDescription:
  *           type: string
- *           description: Short summary or overview of the news article.
  *         datePosted:
  *           type: string
  *           format: date-time
- *           description: Date and time when the article was posted.
  *         user:
- *           type: string
- *           description: ID or username of the author who uploaded the article.
+ *           $ref: '#/components/schemas/User'
  *         picUrl:
  *           type: string
  *           format: uri
- *           description: URL of the main image associated with the news article.
  *         videoUrl:
  *           type: string
  *           format: uri
- *           description: URL of a related video (if available).
  *         timetoread:
  *           type: string
- *           description: Estimated time to read the article (e.g., "5 min").
  *         category:
  *           type: string
- *           description: Category or section of the news.
- *           enum:
- *             - world
- *             - politics
- *             - business
- *             - technology
- *             - health
- *             - sports
- *             - culture
- *             - podcast
- *           default: "Others"
  *         slug:
  *           type: string
- *           description: URL-friendly slug of the article.
  *         content:
  *           type: string
- *           description: Full content or body of the news article.
  *         isTrending:
  *           type: boolean
- *           description: Indicates if the article is currently trending.
  *         isLiveUpdate:
  *           type: boolean
- *           description: Indicates if the article is part of live updates.
  *         createdAt:
  *           type: string
  *           format: date-time
- *           description: Timestamp when the article was created.
  *         updatedAt:
  *           type: string
  *           format: date-time
- *           description: Timestamp when the article was last updated.
  *       required:
- *         - id
  *         - title
  *         - content
+ *         - category
  *       example:
- *         id: "675c54f5bfe9a0323dfb5b91"
+ *         _id: "675c54f5bfe9a0323dfb5b91"
  *         title: "Tech Giants Announce New AI Partnership"
- *         shortDescription: "Leading tech firms collaborate to accelerate AI research and safety measures."
+ *         shortDescription: "Leading tech firms collaborate to accelerate AI research."
  *         datePosted: "2025-10-21T12:00:00Z"
- *         user: "user_123"
+ *         user:
+ *           _id: "64af21b1234567890abcdef1"
+ *           email: "reporter@example.com"
+ *           name: "Jane Reporter"
  *         picUrl: "https://example.com/images/ai-news.jpg"
  *         videoUrl: "https://example.com/videos/ai-news.mp4"
  *         timetoread: "5 min"
@@ -124,36 +128,82 @@ const {
  *         required: true
  *         schema:
  *           type: string
- *         description: News category
+ *         description: News category to filter (e.g., sports, politics)
  *     responses:
  *       200:
- *         description: An array of trending news items
+ *         description: List of trending news in the specified category
  *         content:
  *           application/json:
  *             schema:
  *               type: array
  *               items:
  *                 $ref: '#/components/schemas/NewsItem'
- *       404:
- *         description: Category not found
+ *       500:
+ *         description: Server error while fetching trending news
  */
+router.get("/trending/:category", getTrendingNewsByCategory);
+
+/**
+ * @swagger
+ * /api/news/live:
+ *   get:
+ *     summary: Get latest live news updates
+ *     tags: [News]
+ *     responses:
+ *       200:
+ *         description: Array of live update news items
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/NewsItem'
+ *       500:
+ *         description: Server error while fetching live news
+ */
+router.get("/live", getLiveNews);
 
 /**
  * @swagger
  * /api/news/latest:
  *   get:
- *     summary: Get the latest news
+ *     summary: Get the latest news with pagination
  *     tags: [News]
+ *     parameters:
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *           default: 1
+ *         description: Page number for pagination
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *           default: 10
+ *         description: Number of items per page
  *     responses:
  *       200:
- *         description: An array of latest news items
+ *         description: Paginated list of latest news
  *         content:
  *           application/json:
  *             schema:
- *               type: array
- *               items:
- *                 $ref: '#/components/schemas/NewsItem'
+ *               type: object
+ *               properties:
+ *                 page:
+ *                   type: integer
+ *                 limit:
+ *                   type: integer
+ *                 total:
+ *                   type: integer
+ *                 podcasts:
+ *                   type: array
+ *                   items:
+ *                     $ref: '#/components/schemas/NewsItem'
+ *       500:
+ *         description: Server error while fetching latest news
  */
+router.get("/latest", getLatestNews);
 
 /**
  * @swagger
@@ -167,25 +217,25 @@ const {
  *         required: true
  *         schema:
  *           type: string
- *         description: News category
  *     responses:
  *       200:
- *         description: An array of news items for the specified category
+ *         description: Array of news in the given category
  *         content:
  *           application/json:
  *             schema:
  *               type: array
  *               items:
  *                 $ref: '#/components/schemas/NewsItem'
- *       404:
- *         description: Category not found
+ *       500:
+ *         description: Server error while fetching category news
  */
+router.get("/category/:category", getNewsByCategory);
 
 /**
  * @swagger
  * /api/news/newsdetail/{slug}:
  *   get:
- *     summary: Get detailed news by slug
+ *     summary: Get a specific news item by slug
  *     tags: [News]
  *     parameters:
  *       - in: path
@@ -193,40 +243,26 @@ const {
  *         required: true
  *         schema:
  *           type: string
- *         description: Slug of the news article
+ *         description: Slug of the news item
  *     responses:
  *       200:
- *         description: A single news item
+ *         description: Detailed news item data
  *         content:
  *           application/json:
  *             schema:
  *               $ref: '#/components/schemas/NewsItem'
  *       404:
- *         description: News article not found
+ *         description: News not found
+ *       500:
+ *         description: Server error while fetching news
  */
-
-/**
- * @swagger
- * /api/news/live:
- *   get:
- *     summary: Get live news updates
- *     tags: [News]
- *     responses:
- *       200:
- *         description: An array of live news updates
- *         content:
- *           application/json:
- *             schema:
- *               type: array
- *               items:
- *                 $ref: '#/components/schemas/NewsItem'
- */
+router.get("/newsdetail/:slug", getNewsBySlug);
 
 /**
  * @swagger
  * /api/news/search:
  *   get:
- *     summary: Search news by keyword
+ *     summary: Search for news items
  *     tags: [News]
  *     parameters:
  *       - in: query
@@ -234,90 +270,108 @@ const {
  *         required: true
  *         schema:
  *           type: string
- *         description: Search query keyword
+ *         description: Keyword to search by title, description, or content
  *     responses:
  *       200:
- *         description: An array of matched news items
+ *         description: List of matching news items
  *         content:
  *           application/json:
  *             schema:
  *               type: array
  *               items:
  *                 $ref: '#/components/schemas/NewsItem'
- *       400:
- *         description: Missing or invalid query parameter
+ *       500:
+ *         description: Server error while searching news
  */
+router.get("/search", searchNews);
 
 /**
  * @swagger
- * /api/news/categories:
- *   get:
- *     summary: Get all available news categories
+ * /api/news:
+ *   post:
+ *     summary: Create a new news item
  *     tags: [News]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/NewsItem'
  *     responses:
- *       200:
- *         description: An array of available news categories
+ *       201:
+ *         description: News created successfully
  *         content:
  *           application/json:
  *             schema:
- *               type: array
- *               items:
- *                 type: string
+ *               $ref: '#/components/schemas/NewsItem'
+ *       400:
+ *         description: Validation error
+ *       401:
+ *         description: Unauthorized
  *       500:
  *         description: Server error
  */
+router.post("/", auth, createNews);
 
 /**
- * @route GET /api/news/categories
- * @desc Get all available news categories
- * @returns {string[]} 200 - An array of category names
+ * @swagger
+ * /api/news/{id}:
+ *   put:
+ *     summary: Update an existing news item
+ *     tags: [News]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: News ID to update
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/NewsItem'
+ *     responses:
+ *       200:
+ *         description: News updated successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/NewsItem'
+ *       403:
+ *         description: Not authorized
+ *       404:
+ *         description: News not found
+ *       500:
+ *         description: Server error
+ *
+ *   delete:
+ *     summary: Delete a news item by ID
+ *     tags: [News]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       204:
+ *         description: News deleted successfully
+ *       403:
+ *         description: Not authorized
+ *       404:
+ *         description: News not found
+ *       500:
+ *         description: Server error
  */
-router.get("/categories", getAllCategory);
-
-/**
- * @route GET /api/news/trending/:category
- * @desc Get trending news by category
- * @param {string} category - News category
- * @returns {Object[]} 200 - An array of trending news items
- */
-router.get("/trending/:category", getTrendingNewsByCategory);
-
-/**
- * @route GET /api/news/latest
- * @desc Get latest news
- * @returns {Object[]} 200 - An array of latest news items
- */
-router.get("/latest", getLatestNews);
-
-/**
- * @route GET /api/news/category/:category
- * @desc Get news by category
- * @param {string} category - News category
- * @returns {Object[]} 200 - An array of news items
- */
-router.get("/category/:category", getNewsByCategory);
-
-/**
- * @route GET /api/news/newsdetail/:slug
- * @desc Get news by slug (detail page)
- * @param {string} slug - Slug of the news article
- * @returns {Object} 200 - A single news item
- */
-router.get("/newsdetail/:slug", getNewsBySlug);
-
-/**
- * @route GET /api/news/live
- * @desc Get live news
- * @returns {Object[]} 200 - An array of live news updates
- */
-router.get("/live", getLiveNews);
-
-/**
- * @route GET /api/news/search
- * @desc Search news by keyword
- * @query {string} q - Search query
- * @returns {Object[]} 200 - An array of matched news items
- */
-router.get("/search", searchNews);
+router.put("/:id", auth, updateNews);
+router.delete("/:id", auth, deleteNews);
 
 module.exports = router;
