@@ -19,7 +19,7 @@ const signup = async (req, res) => {
       { id: _id, role: user.role },
       process.env.JWT_SECRET,
       {
-        expiresIn: "10m",
+        expiresIn: "7d",
       }
     );
     const user = new User({ email, password: hashedPassword, role });
@@ -53,7 +53,7 @@ const login = async (req, res) => {
       { id: user._id, role: user.role },
       process.env.JWT_SECRET,
       {
-        expiresIn: "10m",
+        expiresIn: "7d",
       }
     );
 
