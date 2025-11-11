@@ -1,7 +1,84 @@
-// routes/categoryRoutes.js
 const express = require("express");
 const router = express.Router();
 const categoryController = require("../controllers/categories.controller");
+const auth = require("../middleware/auth");
+
+/**
+ * @swagger
+ * components:
+ *   securitySchemes:
+ *     bearerAuth:
+ *       type: http
+ *       scheme: bearer
+ *       bearerFormat: JWT
+ *
+ *   schemas:
+ *     Category:
+ *       type: object
+ *       required:
+ *         - name
+ *       properties:
+ *         _id:
+ *           type: string
+ *           description: Auto-generated ID of the category
+ *           example: 64af21b1234567890abcdef1
+ *         name:
+ *           type: string
+ *           description: Name of the category
+ *           example: Electronics
+ *
+ *   responses:
+ *     BadRequest:
+ *       description: Invalid input or validation error
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               error:
+ *                 type: string
+ *                 example: Category validation failed
+ *     Unauthorized:
+ *       description: No authentication token provided
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               error:
+ *                 type: string
+ *                 example: No token provided
+ *     Forbidden:
+ *       description: Invalid or expired authentication token
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               error:
+ *                 type: string
+ *                 example: Invalid token
+ *     NotFound:
+ *       description: Category not found
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               error:
+ *                 type: string
+ *                 example: Category not found
+ *     ServerError:
+ *       description: Internal server error
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               error:
+ *                 type: string
+ *                 example: Something went wrong
+ */
 
 /**
  * @swagger
@@ -12,9 +89,10 @@ const categoryController = require("../controllers/categories.controller");
 
 /**
  * @swagger
- * /categories:
+ * /api/categories:
  *   get:
  *     summary: Get all categories
+ *     description: Retrieve a list of all categories.
  *     tags: [Categories]
  *     responses:
  *       200:
@@ -24,21 +102,25 @@ const categoryController = require("../controllers/categories.controller");
  *             schema:
  *               type: array
  *               items:
- *                 type: object
- *                 properties:
- *                   name:
- *                     type: string
- *                     example: Electronics
+ *                 $ref: '#/components/schemas/Category'
+ *             example:
+ *               - _id: 64af21b1234567890abcdef1
+ *                 name: Electronics
+ *               - _id: 64af21b1234567890abcdef2
+ *                 name: Clothing
  *       500:
- *         description: Server error
+ *         $ref: '#/components/responses/ServerError'
  */
 
 /**
  * @swagger
- * /categories:
+ * /api/categories:
  *   post:
  *     summary: Add a new category
+ *     description: Create a new category. Requires authentication via JWT.
  *     tags: [Categories]
+ *     security:
+ *       - bearerAuth: []
  *     requestBody:
  *       required: true
  *       content:
@@ -54,36 +136,57 @@ const categoryController = require("../controllers/categories.controller");
  *     responses:
  *       201:
  *         description: Category added successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Category'
+ *             example:
+ *               _id: 64af21b1234567890abcdef3
+ *               name: Clothing
  *       400:
- *         description: Invalid input
+ *         $ref: '#/components/responses/BadRequest'
+ *       401:
+ *         $ref: '#/components/responses/Unauthorized'
+ *       403:
+ *         $ref: '#/components/responses/Forbidden'
  *       500:
- *         description: Server error
+ *         $ref: '#/components/responses/ServerError'
  */
 
 /**
  * @swagger
- * /categories/{name}:
+ * /api/categories/{name}:
  *   delete:
  *     summary: Delete a category by name
+ *     description: Deletes a category by its name. Requires authentication via JWT.
  *     tags: [Categories]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: name
  *         required: true
  *         schema:
  *           type: string
- *         description: Name of the category to delete
+ *         description: The name of the category to delete
+ *         example: Electronics
  *     responses:
- *       200:
- *         description: Category deleted successfully
+ *       204:
+ *         description: Category deleted successfully (no content)
+ *       400:
+ *         $ref: '#/components/responses/BadRequest'
+ *       401:
+ *         $ref: '#/components/responses/Unauthorized'
+ *       403:
+ *         $ref: '#/components/responses/Forbidden'
  *       404:
- *         description: Category not found
+ *         $ref: '#/components/responses/NotFound'
  *       500:
- *         description: Server error
+ *         $ref: '#/components/responses/ServerError'
  */
 
 router.get("", categoryController.getCategories);
-router.post("", categoryController.addCategory);
-router.delete("/:name", categoryController.deleteCategory);
+router.post("", auth, categoryController.addCategory);
+router.delete("/:name", auth, categoryController.deleteCategory);
 
 module.exports = router;

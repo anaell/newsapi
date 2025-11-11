@@ -116,7 +116,7 @@ const userController = require("../controllers/users.controller");
 
 /**
  * @swagger
- * /signup:
+ * /api/auth/signup:
  *   post:
  *     summary: Register a new user
  *     description: Creates a new user. If the correct admin code is provided, assigns the admin role.
@@ -154,7 +154,7 @@ const userController = require("../controllers/users.controller");
 
 /**
  * @swagger
- * /login:
+ * /api/auth/login:
  *   post:
  *     summary: Login a user
  *     description: Authenticates the user and returns a JWT token.
