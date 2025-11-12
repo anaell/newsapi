@@ -9,11 +9,15 @@ const signup = async (req, res) => {
     if (!email || !password)
       res.json({ error: "Email or Password field is missing" }).status(400);
 
-    const existingUser = User.findOne({ email });
+    const existingUser = await User.findOne({ email });
 
     if (existingUser) res.json({ error: "Email already in use" }).status(409);
     const role = adminCode === process.env.ADMIN_SECRET_KEY ? "admin" : "user";
-    const hashedPassword = bcrypt.hash(password, 10);
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    const user = new User({ email, password: hashedPassword, role });
+
+    user.save();
 
     const token = jwt.sign(
       { id: _id, role: user.role },
@@ -22,16 +26,11 @@ const signup = async (req, res) => {
         expiresIn: "7d",
       }
     );
-    const user = new User({ email, password: hashedPassword, role });
-
-    user.save();
-    res
-      .json({
-        token,
-        user: { email: user.email, role: user.role },
-        message: "User created successfully",
-      })
-      .status(201);
+    res.status(201).json({
+      token,
+      user: { email: user.email, role: user.role },
+      message: "User created successfully",
+    });
   } catch (error) {
     res
       .status(error.status || 500)
