@@ -52,25 +52,34 @@ const userRoutes = require("./routes/users.route");
 const app = express();
 const port = process.env.PORT || 5000;
 
-const allowedOrigins = [
-  "http://localhost:5500", // local development
-  // "https://your-frontend-domain.com", // production frontend
+const whitelist = [
+  "http://localhost:5500", // local dev
+  "https://your-frontend-domain.com", // production
 ];
 
-app.use(
-  cors({
-    origin: function (origin, callback) {
-      if (!origin || allowedOrigins.includes(origin)) {
-        callback(null, true); // allow request
-      } else {
-        callback(new Error("Not allowed by CORS")); // block request
-      }
-    },
-    credentials: true, // allow cookies and auth headers
-  })
-);
+const corsOptions = {
+  origin: function (origin, callback) {
+    if (!origin || whitelist.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error("Not allowed by CORS"));
+    }
+  },
+  credentials: true,
+  optionsSuccessStatus: 200, // for legacy browsers
+};
 
-app.options("*", cors());
+app.use(cors(corsOptions));
+
+// Enable preflight for all routes
+app.use((req, res, next) => {
+  if (req.method === "OPTIONS") {
+    cors(corsOptions)(req, res, next);
+  } else {
+    next();
+  }
+});
+
 app.use(express.json());
 
 // Basic test route
