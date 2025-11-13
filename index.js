@@ -52,7 +52,25 @@ const userRoutes = require("./routes/users.route");
 const app = express();
 const port = process.env.PORT || 5000;
 
-app.use(cors());
+const allowedOrigins = [
+  "http://localhost:5500", // local development
+  // "https://your-frontend-domain.com", // production frontend
+];
+
+app.use(
+  cors({
+    origin: function (origin, callback) {
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true); // allow request
+      } else {
+        callback(new Error("Not allowed by CORS")); // block request
+      }
+    },
+    credentials: true, // allow cookies and auth headers
+  })
+);
+
+app.options("*", cors());
 app.use(express.json());
 
 // Basic test route
