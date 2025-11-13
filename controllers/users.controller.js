@@ -7,11 +7,14 @@ const signup = async (req, res) => {
     const { email, password, adminCode } = req.body;
 
     if (!email || !password)
-      res.json({ error: "Email or Password field is missing" }).status(400);
+      return res
+        .json({ error: "Email or Password field is missing" })
+        .status(400);
 
     const existingUser = await User.findOne({ email });
 
-    if (existingUser) res.json({ error: "Email already in use" }).status(409);
+    if (existingUser)
+      return res.json({ error: "Email already in use" }).status(409);
     const role = adminCode === process.env.ADMIN_SECRET_KEY ? "admin" : "user";
     const hashedPassword = await bcrypt.hash(password, 10);
 
@@ -20,7 +23,7 @@ const signup = async (req, res) => {
     user.save();
 
     const token = jwt.sign(
-      { id: _id, role: user.role },
+      { id: user._id, role: user.role },
       process.env.JWT_SECRET,
       {
         expiresIn: "7d",
