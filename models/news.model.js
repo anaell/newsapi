@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+const Category = require("./categories.model")
 
 const newsSchema = new mongoose.Schema(
   {
