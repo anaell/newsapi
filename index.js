@@ -53,9 +53,8 @@ const app = express();
 const port = process.env.PORT || 5000;
 
 const whitelist = [
-  "http://localhost:5500", // local dev
-  // "https://your-frontend-domain.com", // production
-  "http://127.0.0.1:5500",
+ "https://blog-8c82.vercel.app", // production
+  "http://127.0.0.1:5500", //local
 ];
 
 const corsOptions = {
