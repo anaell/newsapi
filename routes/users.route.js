@@ -196,7 +196,51 @@ const userController = require("../controllers/users.controller");
  *         $ref: '#/components/responses/ServerError'
  */
 
+/**
+ * @route PUT /api/auth/users/:id
+ * @summary Update a user's profile
+ * @description
+ * Updates an existing user.
+ * Only the user themselves **or an admin** can perform this action.
+ * A normal user **cannot update their role** — if `role` is passed, it will be removed.
+ *
+ * @param {string} req.params.id - The ID of the user to update
+ * @param {Object} req.body - Fields to update (email, name, role*)
+ * @param {string} [req.body.email] - Updated email
+ * @param {string} [req.body.name] - Updated name
+ * @param {string} [req.body.role] - Updated role (only admin can change)
+ *
+ * @requires Authentication (Bearer Token)
+ *
+ * @returns {200 OK} User updated successfully
+ * @returns {400 Bad Request} Invalid input data
+ * @returns {401 Unauthorized} If user is not the owner AND not admin
+ * @returns {500 Internal Server Error} Server error
+ */
+
+/**
+ * @route DELETE /api/auth/users/:id
+ * @summary Delete a user and all related content
+ * @description
+ * Deletes a user by ID and cascades deletion to:
+ * - News authored by the user
+ * - Podcasts created by the user
+ *
+ * Only the user themselves **or an admin** can delete a user.
+ *
+ * @param {string} req.params.id - The ID of the user to delete
+ *
+ * @requires Authentication (Bearer Token)
+ *
+ * @returns {200 OK} User deleted successfully
+ * @returns {401 Unauthorized} If user is not the owner AND not admin
+ * @returns {404 Not Found} If user does not exist
+ * @returns {500 Internal Server Error} Server error
+ */
+
 router.post("/signup", userController.signup);
 router.post("/login", userController.login);
+router.put("/users/:id", auth, userController.updateUser);
+router.delete("/users/:id", auth, userController.deleteUser);
 
 module.exports = router;

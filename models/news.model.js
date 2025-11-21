@@ -1,5 +1,5 @@
 const mongoose = require("mongoose");
-const Category = require("./categories.model")
+const Category = require("./categories.model");
 
 const newsSchema = new mongoose.Schema(
   {
@@ -53,9 +53,11 @@ const newsSchema = new mongoose.Schema(
     },
     isTrending: {
       type: Boolean,
+      // default: false,
     },
     isLiveUpdate: {
       type: Boolean,
+      // default: false,
     },
   },
   { timestamps: true }

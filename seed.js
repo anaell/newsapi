@@ -1287,10 +1287,19 @@ const allNews = [
   ...cultureNews,
 ];
 mongoose.connect(process.env.MONGODB_URI).then(async () => {
-  await News.deleteMany({});
+  // await News.deleteMany({});
   await Podcast.deleteMany({});
-  await News.insertMany(allNews);
-  await Podcast.insertMany(podcasts);
-  console.log("Database seeded successfully!");
+  // await News.insertMany(allNews);
+  // await Podcast.insertMany(podcasts);
+  // console.log("Database seeded successfully!");
+  await News.deleteMany({
+    id: { $in: allNews.map((item) => item.id) },
+  });
+  // console.log(allNews.map((item) => item.id));
+
+  console.log("Information deleted successfully");
+
+  // await Podcast.deleteMany(podcasts);
+
   mongoose.disconnect();
 });
