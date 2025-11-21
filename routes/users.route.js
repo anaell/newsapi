@@ -198,45 +198,93 @@ const auth = require("../middleware/auth");
  */
 
 /**
- * @route PUT /api/auth/users/:id
- * @summary Update a user's profile
- * @description
- * Updates an existing user.
- * Only the user themselves **or an admin** can perform this action.
- * A normal user **cannot update their role** — if `role` is passed, it will be removed.
- *
- * @param {string} req.params.id - The ID of the user to update
- * @param {Object} req.body - Fields to update (email, name, role*)
- * @param {string} [req.body.email] - Updated email
- * @param {string} [req.body.name] - Updated name
- * @param {string} [req.body.role] - Updated role (only admin can change)
- *
- * @requires Authentication (Bearer Token)
- *
- * @returns {200 OK} User updated successfully
- * @returns {400 Bad Request} Invalid input data
- * @returns {401 Unauthorized} If user is not the owner AND not admin
- * @returns {500 Internal Server Error} Server error
+ * @swagger
+ * /api/auth/users/{id}:
+ *   put:
+ *     summary: Update a user's profile
+ *     description: Only the user themselves or an admin can update user data. Normal users cannot update their role.
+ *     tags: [Authentication]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: ID of the user to update
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               email:
+ *                 type: string
+ *                 example: updated@example.com
+ *               name:
+ *                 type: string
+ *                 example: Updated Name
+ *               role:
+ *                 type: string
+ *                 enum: [user, admin]
+ *                 example: admin
+ *                 description: Only admins can update role
+ *     responses:
+ *       200:
+ *         description: User updated successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 user:
+ *                   $ref: '#/components/schemas/User'
+ *                 message:
+ *                   type: string
+ *                   example: Update successful
+ *       400:
+ *         description: Invalid input data
+ *       401:
+ *         description: Unauthorized — must be owner or admin
+ *       500:
+ *         description: Server error
  */
 
 /**
- * @route DELETE /api/auth/users/:id
- * @summary Delete a user and all related content
- * @description
- * Deletes a user by ID and cascades deletion to:
- * - News authored by the user
- * - Podcasts created by the user
- *
- * Only the user themselves **or an admin** can delete a user.
- *
- * @param {string} req.params.id - The ID of the user to delete
- *
- * @requires Authentication (Bearer Token)
- *
- * @returns {200 OK} User deleted successfully
- * @returns {401 Unauthorized} If user is not the owner AND not admin
- * @returns {404 Not Found} If user does not exist
- * @returns {500 Internal Server Error} Server error
+ * @swagger
+ * /api/auth/users/{id}:
+ *   delete:
+ *     summary: Delete a user and their associated content
+ *     description: Deletes the user and all News/Podcast entries associated with the user. Only the user or an admin may delete.
+ *     tags: [Authentication]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: ID of the user to delete
+ *     responses:
+ *       200:
+ *         description: User and related data deleted successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: User and related data deleted successfully
+ *       401:
+ *         description: Unauthorized — must be owner or admin
+ *       404:
+ *         description: User not found
+ *       500:
+ *         description: Server error
  */
 
 router.post("/signup", userController.signup);
