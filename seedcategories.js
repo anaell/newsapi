@@ -3,7 +3,7 @@ const mongoose = require("mongoose");
 const Categories = require("./models/categories.model");
 
 const categories = [
-  { name: "world news" },
+  { name: "world" },
   { name: "technology" },
   { name: "sports" },
   { name: "health" },
