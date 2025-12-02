@@ -10,12 +10,16 @@ const categoryRoutes = require("./routes/categories.route");
 const userRoutes = require("./routes/users.route");
 
 const app = express();
-const port = process.env.PORT || 5000;
+const port = process.env.PORT;
 
 const whitelist = [
   "https://blog-8c82.vercel.app",
   "http://127.0.0.1:5500",
   "http://localhost:5500", // ADD THIS
+  "http://127.0.0.1:5501",
+  "http://localhost:5501",
+  "http://127.0.0.1:5502",
+  "http://localhost:5502",
 ];
 
 const corsOptions = {
