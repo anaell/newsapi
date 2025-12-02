@@ -22,7 +22,7 @@ const signup = async (req, res) => {
 
     const user = new User({ email, password: hashedPassword, role });
 
-    user.save();
+    await user.save();
 
     const token = jwt.sign(
       { id: user._id, role: user.role },
