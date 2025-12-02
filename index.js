@@ -13,32 +13,23 @@ const app = express();
 const port = process.env.PORT || 5000;
 
 const whitelist = [
-  "https://blog-8c82.vercel.app", // production
-  "http://127.0.0.1:5500", //local
+  "https://blog-8c82.vercel.app",
+  "http://127.0.0.1:5500",
+  "http://localhost:5500", // ADD THIS
 ];
 
 const corsOptions = {
   origin: function (origin, callback) {
-    if (!origin || whitelist.includes(origin)) {
-      callback(null, true);
-    } else {
-      callback(new Error("Not allowed by CORS"));
-    }
+    console.log("Request Origin:", origin); // log it
+
+    if (!origin) return callback(null, true); // allow non-browser tools
+    if (whitelist.includes(origin)) return callback(null, true);
+
+    return callback(new Error("Not allowed by CORS"));
   },
   credentials: true,
-  optionsSuccessStatus: 200, // for legacy browsers
 };
-
 app.use(cors(corsOptions));
-
-// Enable preflight for all routes
-app.use((req, res, next) => {
-  if (req.method === "OPTIONS") {
-    cors(corsOptions)(req, res, next);
-  } else {
-    next();
-  }
-});
 
 app.use(express.json());
 
